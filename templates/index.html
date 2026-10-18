@@ -5,85 +5,148 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>WorldPulse News | {{ country_name }}</title>
+    <title>{{ country_name }} News | WorldPulse News</title>
+    <meta name="description" content="Latest world news and breaking updates from WorldPulse News.">
 
-    <meta name="description"
-          content="Latest world news, headlines and stories from multiple countries.">
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
 
-<header class="header">
-    <a href="{{ url_for('home') }}" class="logo">
-        WorldPulse<span>News</span>
-    </a>
+    <header class="site-header">
+        <div class="header-container">
+            <a class="logo" href="/">
+                <span class="logo-icon">W</span>
+                <span>WorldPulse<span class="logo-accent"> News</span></span>
+            </a>
 
-    <p>News from around the world</p>
-</header>
+            <nav class="main-nav">
+                <a href="/" class="{% if selected_country == 'world' %}active{% endif %}">
+                    World
+                </a>
 
-<nav class="navbar">
-    {% for code, name in countries.items() %}
-        <a
-            href="{{ url_for('country_news', country_code=code) }}"
-            class="{% if selected_country == code %}active{% endif %}"
-        >
-            {{ name }}
-        </a>
-    {% endfor %}
-</nav>
+                {% for code, name in countries.items() %}
+                    {% if code != 'world' %}
+                    <a
+                        href="{{ url_for('country_news', country_code=code) }}"
+                        class="{% if selected_country == code %}active{% endif %}"
+                    >
+                        {{ name }}
+                    </a>
+                    {% endif %}
+                {% endfor %}
+            </nav>
+        </div>
+    </header>
 
-<main class="container">
+    <main class="container">
 
-    <section class="welcome">
-        <p class="eyebrow">YOUR WORLD. YOUR NEWS.</p>
+        <section class="hero">
+            <div class="hero-content">
+                <span class="eyebrow">YOUR WORLD. YOUR NEWS.</span>
+                <h1>Stay informed.<br><span>Stay ahead.</span></h1>
+                <p>
+                    Discover the latest headlines, breaking stories,
+                    and important updates from around the world.
+                </p>
 
-        <h1>Latest News from {{ country_name }}</h1>
+                <a class="hero-button" href="#latest-news">
+                    Explore Latest News →
+                </a>
+            </div>
 
-        <p>Explore the stories shaping our world.</p>
-    </section>
+            <div class="hero-decoration">
+                <div class="globe">🌍</div>
+                <div class="hero-label">NEWS WITHOUT BORDERS</div>
+            </div>
+        </section>
 
-    {% if news %}
+        <section class="news-section" id="latest-news">
 
-        <section class="news-grid">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">LATEST UPDATES</span>
+                    <h2>{{ country_name }} News</h2>
+                    <p class="section-description">
+                        The latest stories from {{ country_name }}.
+                    </p>
+                </div>
 
-            {% for article in news %}
-                <article class="news-card">
+                <div class="news-count">
+                    {{ news|length }} stories
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <div class="search-box">
+                    <span>🔎</span>
+                    <input
+                        type="search"
+                        id="newsSearch"
+                        placeholder="Search headlines..."
+                        aria-label="Search news headlines"
+                    >
+                </div>
+
+                <select id="sourceFilter" aria-label="Filter news by source">
+                    <option value="all">All sources</option>
+                    {% for article in news %}
+                        {% if article.source %}
+                        <option value="{{ article.source|lower }}">
+                            {{ article.source }}
+                        </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if news %}
+
+            <div class="news-grid" id="newsGrid">
+
+                {% for article in news %}
+
+                <article
+                    class="news-card"
+                    data-title="{{ article.title|lower }}"
+                    data-source="{{ article.source|lower }}"
+                >
 
                     <a
                         class="image-link"
                         href="{{ article.url }}"
                         target="_blank"
                         rel="noopener noreferrer"
+                        aria-label="Read {{ article.title }}"
                     >
-                        {% if article.image %}
-                            <img
-                                src="{{ article.image }}"
-                                alt="{{ article.title }}"
-                                class="news-image"
-                                loading="lazy"
-                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                            >
+                        <img
+                            class="news-image"
+                            src="{{ article.image or url_for('static', filename='news-placeholder.svg') }}"
+                            alt="{{ article.title }}"
+                            loading="lazy"
+                            onerror="this.onerror=null;this.src='{{ url_for('static', filename='news-placeholder.svg') }}';"
+                        >
 
-                            <div class="image-fallback" style="display:none;">
-                                <span>WorldPulse News</span>
-                            </div>
-                        {% else %}
-                            <div class="image-fallback">
-                                <span>WorldPulse News</span>
-                            </div>
-                        {% endif %}
+                        <span class="image-badge">
+                            {{ article.source }}
+                        </span>
                     </a>
 
-                    <div class="news-content">
+                    <div class="card-content">
 
-                        <p class="source">
-                            {{ article.source }}
-                        </p>
+                        <div class="article-meta">
+                            <span class="source-name">
+                                {{ article.source }}
+                            </span>
 
-                        <h2>
+                            {% if article.published %}
+                            <span class="published-date">
+                                {{ article.published }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <h3>
                             <a
                                 href="{{ article.url }}"
                                 target="_blank"
@@ -91,64 +154,104 @@
                             >
                                 {{ article.title }}
                             </a>
-                        </h2>
+                        </h3>
 
-                        <p class="description">
-                            {{ article.description }}
+                        <p class="article-description">
+                            {{ article.description|truncate(180, True, '...') }}
                         </p>
 
-                        <div class="card-footer">
-                            <span>
-                                {{ article.published[:16] }}
-                            </span>
-
-                            <a
-                                href="{{ article.url }}"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                Read more →
-                            </a>
-                        </div>
+                        <a
+                            class="read-more"
+                            href="{{ article.url }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Read Full Story <span>→</span>
+                        </a>
 
                     </div>
                 </article>
-            {% endfor %}
+
+                {% endfor %}
+
+            </div>
+
+            <div id="noResults" class="no-results" hidden>
+                <span>🔎</span>
+                <h3>No stories found</h3>
+                <p>Try another search term or select a different source.</p>
+            </div>
+
+            {% else %}
+
+            <div class="empty-state">
+                <span>📰</span>
+                <h3>No news available right now</h3>
+                <p>The news feeds may be temporarily unavailable. Please try again later.</p>
+                <a class="hero-button" href="">Refresh News</a>
+            </div>
+
+            {% endif %}
 
         </section>
 
-    {% else %}
+    </main>
 
-        <section class="empty-state">
-            <h2>No news available right now</h2>
-
-            <p>
-                The news feed may be temporarily unavailable.
-                Check your internet connection and try again.
-            </p>
-
-            <a
-                class="retry-button"
-                href="{{ url_for('country_news', country_code=selected_country) }}"
-            >
-                Try again
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <a class="logo footer-logo" href="/">
+                <span class="logo-icon">W</span>
+                <span>WorldPulse<span class="logo-accent"> News</span></span>
             </a>
-        </section>
 
-    {% endif %}
+            <p>Bringing the world closer, one story at a time.</p>
+            <p class="copyright">
+                © {{ country_name }} · WorldPulse News
+            </p>
+        </div>
+    </footer>
 
-</main>
+    <script>
+        const searchInput = document.getElementById("newsSearch");
+        const sourceFilter = document.getElementById("sourceFilter");
+        const newsCards = document.querySelectorAll(".news-card");
+        const noResults = document.getElementById("noResults");
 
-<footer class="footer">
-    <p>
-        © 2026 WorldPulse News.
-        Stay informed, stay connected.
-    </p>
+        function filterNews() {
+            const query = searchInput.value.toLowerCase().trim();
+            const source = sourceFilter.value.toLowerCase();
+            let visibleCount = 0;
 
-    <p class="footer-note">
-        News articles belong to their respective publishers.
-    </p>
-</footer>
+            newsCards.forEach(card => {
+                const title = card.dataset.title || "";
+                const cardSource = card.dataset.source || "";
+
+                const matchesSearch = title.includes(query);
+                const matchesSource =
+                    source === "all" || cardSource === source;
+
+                const visible = matchesSearch && matchesSource;
+
+                card.hidden = !visible;
+
+                if (visible) {
+                    visibleCount++;
+                }
+            });
+
+            if (noResults) {
+                noResults.hidden = visibleCount !== 0;
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener("input", filterNews);
+        }
+
+        if (sourceFilter) {
+            sourceFilter.addEventListener("change", filterNews);
+        }
+    </script>
 
 </body>
 </html>
