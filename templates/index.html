@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>WorldPulse News | {{ country_name }}</title>
+
+    <meta name="description"
+          content="Latest world news, headlines and stories from multiple countries.">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<header class="header">
+    <a href="{{ url_for('home') }}" class="logo">
+        WorldPulse<span>News</span>
+    </a>
+
+    <p>News from around the world</p>
+</header>
+
+<nav class="navbar">
+    {% for code, name in countries.items() %}
+        <a
+            href="{{ url_for('country_news', country_code=code) }}"
+            class="{% if selected_country == code %}active{% endif %}"
+        >
+            {{ name }}
+        </a>
+    {% endfor %}
+</nav>
+
+<main class="container">
+
+    <section class="welcome">
+        <p class="eyebrow">YOUR WORLD. YOUR NEWS.</p>
+
+        <h1>Latest News from {{ country_name }}</h1>
+
+        <p>Explore the stories shaping our world.</p>
+    </section>
+
+    {% if news %}
+
+        <section class="news-grid">
+
+            {% for article in news %}
+                <article class="news-card">
+
+                    <a
+                        class="image-link"
+                        href="{{ article.url }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        {% if article.image %}
+                            <img
+                                src="{{ article.image }}"
+                                alt="{{ article.title }}"
+                                class="news-image"
+                                loading="lazy"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                            >
+
+                            <div class="image-fallback" style="display:none;">
+                                <span>WorldPulse News</span>
+                            </div>
+                        {% else %}
+                            <div class="image-fallback">
+                                <span>WorldPulse News</span>
+                            </div>
+                        {% endif %}
+                    </a>
+
+                    <div class="news-content">
+
+                        <p class="source">
+                            {{ article.source }}
+                        </p>
+
+                        <h2>
+                            <a
+                                href="{{ article.url }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                {{ article.title }}
+                            </a>
+                        </h2>
+
+                        <p class="description">
+                            {{ article.description }}
+                        </p>
+
+                        <div class="card-footer">
+                            <span>
+                                {{ article.published[:16] }}
+                            </span>
+
+                            <a
+                                href="{{ article.url }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Read more →
+                            </a>
+                        </div>
+
+                    </div>
+                </article>
+            {% endfor %}
+
+        </section>
+
+    {% else %}
+
+        <section class="empty-state">
+            <h2>No news available right now</h2>
+
+            <p>
+                The news feed may be temporarily unavailable.
+                Check your internet connection and try again.
+            </p>
+
+            <a
+                class="retry-button"
+                href="{{ url_for('country_news', country_code=selected_country) }}"
+            >
+                Try again
+            </a>
+        </section>
+
+    {% endif %}
+
+</main>
+
+<footer class="footer">
+    <p>
+        © 2026 WorldPulse News.
+        Stay informed, stay connected.
+    </p>
+
+    <p class="footer-note">
+        News articles belong to their respective publishers.
+    </p>
+</footer>
+
+</body>
+</html>
